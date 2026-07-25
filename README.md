@@ -5,6 +5,12 @@ A fully local, self-hosted AI assistant inspired by Iron Man's JARVIS — runnin
 ![Status](https://img.shields.io/badge/status-functional-brightgreen)
 ![Privacy](https://img.shields.io/badge/data-100%25%20local-blue)
 
+## Demo
+
+The floating orb overlay (`jarvis-hud`, orb mode) — the arc-reactor HUD used as the always-on-top desktop widget:
+
+https://github.com/Angga-29/jarvis-ai-assistant/raw/claude/portfolio-project-analysis-wxc3a4/docs/orb-demo.mp4
+
 ## What It Does
 
 - **Voice conversation** — speak naturally, JARVIS listens, thinks, and talks back
@@ -40,9 +46,39 @@ This project involved real debugging, not just following a tutorial:
 - **Diagnosed a GPU driver crash** (`vk::Queue::submit: ErrorDeviceLost`) when attempting Vulkan-accelerated inference on an integrated AMD GPU — verified via Ollama's own logs that the failure was a genuine driver-level issue, not a config mistake, and made the call to revert to a stable CPU-only configuration rather than chase an unstable path.
 - **TTS language mismatch**: initially used an English Piper voice for character, but it mispronounced Indonesian text (especially numbers). Diagnosed the root cause (English phonetic model applied to Indonesian text) and switched to Meta's MMS-TTS project, which has a dedicated Indonesian-trained model.
 
+## Repository Layout
+
+| Path | What it is |
+|---|---|
+| `jarvis-hud/` | React UI (chat/voice HUD + floating orb) plus the Electron shell (`electron/main.js`, `electron/preload.js`) that gives the orb window, mic/screen access, and always-on-top drag behavior |
+| `jarvis-tts/` | Standalone FastAPI microservice wrapping Meta's MMS-TTS Indonesian model |
+| `openjarvis-patches/` | Three patch files contributed back to the [OpenJarvis](https://github.com/) backend this assistant runs on — **not a copy of OpenJarvis itself**, just the fixes described above (CORS preflight, vision routing, etc.), kept here as a record of the debugging work |
+
+Running the whole assistant end-to-end also requires a working OpenJarvis backend instance (with Ollama configured) — that project is not vendored into this repo.
+
+## Running the Desktop Overlay
+
+```bash
+cd jarvis-hud
+npm install
+npm run dev        # terminal 1: Vite dev server
+npm run overlay    # terminal 2: Electron floating orb window
+```
+
+`electron/main.js` opens a small frameless, transparent, always-on-top window pointed at the dev server's `?mode=orb` route; `electron/preload.js` exposes `window.orbAPI.captureScreen()` (via `desktopCapturer`) and `window.orbAPI.moveWindowBy()` (drag-to-reposition) to the renderer through `contextBridge`.
+
+## Security Notes
+
+- `OPENJARVIS_API_KEY` / `VITE_API_KEY` are meant for a private LAN, not a public deployment — the Vite build bundles the key into client-side JS, which is fine for a machine only your own devices can reach but would need a proper auth flow before exposing this over the internet.
+- `check_bind_safety()` in `openjarvis-patches/auth_middleware.py` refuses to bind the backend to a non-loopback address without an API key set, specifically to guard against this.
+
 ## What's Not Included
 
-Personal configuration (API keys, network settings, WiFi credentials) has been stripped from this repository. See `.env.example` for the environment variables you'll need to supply.
+Personal configuration (API keys, network settings, WiFi credentials) has been stripped from this repository. See `.env.example` for the environment variables you'll need to supply. The OpenJarvis backend itself and its Ollama/model setup are also external to this repo — see the patch files' docstrings for the exact fixes applied to it.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
 
 ## Author
 
