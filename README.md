@@ -52,9 +52,33 @@ This project involved real debugging, not just following a tutorial:
 |---|---|
 | `jarvis-hud/` | React UI (chat/voice HUD + floating orb) plus the Electron shell (`electron/main.js`, `electron/preload.js`) that gives the orb window, mic/screen access, and always-on-top drag behavior |
 | `jarvis-tts/` | Standalone FastAPI microservice wrapping Meta's MMS-TTS Indonesian model |
-| `openjarvis-patches/` | Three patch files contributed back to the [OpenJarvis](https://github.com/) backend this assistant runs on — **not a copy of OpenJarvis itself**, just the fixes described above (CORS preflight, vision routing, etc.), kept here as a record of the debugging work |
+| `openjarvis-patches/` | Three patch files contributed back to [OpenJarvis](https://github.com/open-jarvis/OpenJarvis) — the local-first agent framework this assistant's backend runs on — **not a copy of OpenJarvis itself**, just the fixes described above (CORS preflight, vision routing, etc.), kept here as a record of the debugging work |
 
-Running the whole assistant end-to-end also requires a working OpenJarvis backend instance (with Ollama configured) — that project is not vendored into this repo.
+## Quick Start
+
+Running the full assistant means standing up three separate pieces, in this order:
+
+1. **Backend — [OpenJarvis](https://github.com/open-jarvis/OpenJarvis)** (external project, not vendored here)
+   ```bash
+   git clone https://github.com/open-jarvis/OpenJarvis.git
+   cd OpenJarvis
+   # follow OpenJarvis's own install docs, then pull the models this project uses:
+   ollama pull qwen2.5:7b
+   ollama pull llava:13b
+   # apply the fixes in openjarvis-patches/ (auth_middleware.py, models.py, routes.py)
+   # to the matching files in your OpenJarvis checkout, then start the server
+   # (defaults to http://localhost:8000 — the host jarvis-hud talks to)
+   ```
+
+2. **TTS microservice — `jarvis-tts/`**
+   ```bash
+   cd jarvis-tts
+   pip install -r requirements.txt
+   uvicorn server:app --host 0.0.0.0 --port 8001
+   ```
+   Downloads `facebook/mms-tts-ind` from Hugging Face on first run.
+
+3. **Desktop overlay — `jarvis-hud/`** (see below)
 
 ## Running the Desktop Overlay
 
@@ -65,7 +89,7 @@ npm run dev        # terminal 1: Vite dev server
 npm run overlay    # terminal 2: Electron floating orb window
 ```
 
-`electron/main.js` opens a small frameless, transparent, always-on-top window pointed at the dev server's `?mode=orb` route; `electron/preload.js` exposes `window.orbAPI.captureScreen()` (via `desktopCapturer`) and `window.orbAPI.moveWindowBy()` (drag-to-reposition) to the renderer through `contextBridge`.
+`electron/main.js` opens a small frameless, transparent, always-on-top window pointed at the dev server's `?mode=orb` route; `electron/preload.js` exposes `window.orbAPI.captureScreen()` (via `desktopCapturer`) and `window.orbAPI.moveWindowBy()` (drag-to-reposition) to the renderer through `contextBridge`. The UI expects the backend on port 8000 and the TTS service on port 8001 (see `API_BASE` / `TTS_BASE` in `src/App.jsx`).
 
 ## Security Notes
 
