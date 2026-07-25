@@ -5,6 +5,12 @@ A fully local, self-hosted AI assistant inspired by Iron Man's JARVIS — runnin
 ![Status](https://img.shields.io/badge/status-functional-brightgreen)
 ![Privacy](https://img.shields.io/badge/data-100%25%20local-blue)
 
+## Demo
+
+The floating orb overlay (`jarvis-hud`, orb mode) — the arc-reactor HUD used as the always-on-top desktop widget:
+
+https://github.com/Angga-29/jarvis-ai-assistant/raw/claude/portfolio-project-analysis-wxc3a4/docs/orb-demo.mp4
+
 ## What It Does
 
 - **Voice conversation** — speak naturally, JARVIS listens, thinks, and talks back
