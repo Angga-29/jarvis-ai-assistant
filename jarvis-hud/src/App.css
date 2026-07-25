@@ -1,0 +1,305 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg: #010810;
+  --cyan: #00bbee;
+  --cyan-bright: #00d4ff;
+  --text: #b8dce8;
+  --text-dim: #3f7488;
+  --border: rgba(0, 170, 220, 0.18);
+  --border-strong: rgba(0, 200, 255, 0.4);
+  --ok: #00e676;
+  --warn: #ff9800;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: radial-gradient(ellipse at 50% 38%, #041426 0%, #010810 62%, #000508 100%);
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  flex-shrink: 0;
+}
+.topbar__brand {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 5px;
+  font-size: 15px;
+  color: var(--cyan-bright);
+  text-shadow: 0 0 14px rgba(0, 200, 255, 0.5);
+}
+.topbar__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+.topbar__clock {
+  margin-left: 14px;
+  color: var(--text);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.dot--ok   { background: var(--ok);   box-shadow: 0 0 8px var(--ok); }
+.dot--warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+
+/* ── Stage ── */
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 0 40px;
+  gap: 16px;
+}
+
+.stage__label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+}
+
+.stage__subtitle {
+  max-width: 600px;
+  min-height: 26px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  animation: fadein 0.4s ease-out;
+}
+
+.stage__meta {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  font-family: 'Orbitron', sans-serif;
+  animation: fadein 0.4s ease-out;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reactor ── */
+.reactor { width: 280px; height: 280px; }
+.reactor__svg { width: 100%; height: 100%; overflow: visible; }
+
+.ring { fill: none; stroke: var(--cyan); }
+.ring--faint { stroke-width: 0.6; stroke-opacity: 0.18; }
+.ring--ticks {
+  stroke-width: 1; stroke-opacity: 0.4;
+  transform-origin: 120px 120px;
+  animation: spin 50s linear infinite;
+}
+.ring--blocks {
+  stroke: none;
+  transform-origin: 120px 120px;
+  animation: spin-rev 26s linear infinite;
+}
+.ring--blocks rect { fill: var(--cyan); fill-opacity: 0.55; }
+.ring--hex  { stroke-width: 1;   stroke-opacity: 0.35; stroke-dasharray: 3 5; }
+.ring--mid  { stroke-width: 1.6; stroke-opacity: 0.8; }
+
+.core--glow   { fill: rgba(0,200,255,.12); filter: blur(7px); }
+.core--bright { fill: rgba(0,210,255,.55); stroke: var(--cyan-bright); stroke-width: 1; }
+.core--center { fill: #eafcff; filter: drop-shadow(0 0 7px #00d4ff); }
+
+@keyframes spin     { to { transform: rotate(360deg);  } }
+@keyframes spin-rev { to { transform: rotate(-360deg); } }
+
+/* idle — slow breath */
+.reactor--idle .core--bright,
+.reactor--idle .core--glow {
+  animation: pulse-slow 3.2s ease-in-out infinite;
+}
+
+/* thinking — fast pulse, rings spin up */
+.reactor--thinking .core--bright,
+.reactor--thinking .core--glow {
+  animation: pulse-fast 0.7s ease-in-out infinite;
+}
+.reactor--thinking .ring--ticks  { animation-duration: 6s; }
+.reactor--thinking .ring--blocks { animation-duration: 3.5s; }
+.reactor--thinking .ring--mid,
+.reactor--thinking .ring--blocks rect {
+  stroke: var(--cyan-bright);
+  fill: var(--cyan-bright);
+}
+
+/* speaking — soft glow wave */
+.reactor--speaking .core--bright,
+.reactor--speaking .core--glow {
+  animation: pulse-speak 1.1s ease-in-out infinite;
+}
+
+@keyframes pulse-slow  {
+  0%,100% { opacity:.6;  transform:scale(1);    }
+  50%     { opacity:1;   transform:scale(1.04); }
+}
+@keyframes pulse-fast  {
+  0%,100% { opacity:.5;  transform:scale(.95);  }
+  50%     { opacity:1;   transform:scale(1.14); }
+}
+@keyframes pulse-speak {
+  0%,100% { opacity:.75; transform:scale(1.02); }
+  50%     { opacity:1;   transform:scale(1.09); }
+}
+
+/* ── Input bar ── */
+.inputbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 30px 26px;
+  flex-shrink: 0;
+}
+.inputbar__field {
+  flex: 1;
+  background: rgba(0,180,255,.05);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 11px 18px;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+}
+.inputbar__field:focus    { outline: none; border-color: var(--border-strong); }
+.inputbar__field::placeholder { color: var(--text-dim); }
+
+.inputbar__mic,
+.inputbar__send {
+  background: rgba(0,180,255,.08);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  color: var(--cyan);
+  cursor: pointer;
+}
+.inputbar__mic {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: not-allowed; opacity: .4; flex-shrink: 0;
+}
+.inputbar__send {
+  padding: 0 20px; height: 40px; flex-shrink: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing: 1.5px; color: var(--cyan-bright);
+}
+.inputbar__send:hover:not(:disabled) {
+  background: rgba(0,200,255,.16);
+  border-color: var(--border-strong);
+}
+.inputbar__send:disabled { opacity: .35; cursor: not-allowed; }
+/* ── Listening state (mic recording) ── */
+.reactor--listening .core--bright,
+.reactor--listening .core--glow {
+  animation: pulse-listen 0.6s ease-in-out infinite;
+  fill: #ff3b3b;
+}
+.reactor--listening .ring--mid {
+  stroke: #ff3b3b;
+}
+.reactor--listening .ring--ticks {
+  animation-duration: 4s;
+}
+
+@keyframes pulse-listen {
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.15); }
+}
+
+.inputbar__mic--active {
+  background: rgba(255, 59, 59, 0.15) !important;
+  border-color: rgba(255, 59, 59, 0.5) !important;
+  color: #ff3b3b !important;
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(255, 59, 59, 0); }
+}
+
+/* ── Orb mode — used by the Electron floating overlay ── */
+body.orb-mode,
+body.orb-mode #root {
+  background: transparent !important;
+}
+
+.orb-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.orb-wrap .reactor {
+  width: 130px;
+  height: 130px;
+  animation: orb-entrance 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes orb-entrance {
+  from {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* ── Analyzing state (screen vision — slow, ~60-90s) ── */
+.reactor--analyzing .core--bright,
+.reactor--analyzing .core--glow {
+  animation: pulse-analyze 2.2s ease-in-out infinite;
+  fill: #a855f7;
+}
+.reactor--analyzing .ring--mid {
+  stroke: #a855f7;
+}
+.reactor--analyzing .ring--ticks {
+  animation-duration: 8s;
+}
+.reactor--analyzing .ring--blocks rect {
+  fill: #a855f7;
+}
+
+@keyframes pulse-analyze {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.1); }
+}
