@@ -9,7 +9,7 @@ A fully local, self-hosted AI assistant inspired by Iron Man's JARVIS — runnin
 
 The floating orb overlay (`jarvis-hud`, orb mode) — the arc-reactor HUD used as the always-on-top desktop widget:
 
-https://github.com/Angga-29/jarvis-ai-assistant/raw/claude/portfolio-project-analysis-wxc3a4/docs/orb-demo.mp4
+https://github.com/Angga-29/jarvis-ai-assistant/raw/main/docs/orb-demo.mp4
 
 ## What It Does
 
