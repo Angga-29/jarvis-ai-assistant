@@ -103,7 +103,9 @@ JARVIS spans two machines (the headless mini PC server and the client laptop run
 ```bash
 # on the mini PC
 chmod +x uninstall/uninstall-server.sh
-./uninstall/uninstall-server.sh            # add --purge-ollama to remove Ollama itself too
+./uninstall/uninstall-server.sh            # by default keeps Ollama + all its models untouched
+                                            # add --remove-models to also remove qwen2.5:7b/llava:13b
+                                            # add --purge-ollama (with --remove-models) to remove Ollama itself
 ```
 
 ```powershell

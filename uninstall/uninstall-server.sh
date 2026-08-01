@@ -3,10 +3,19 @@
 # + Ollama + jarvis-tts). Run this ON the mini PC, not on the client laptop —
 # see uninstall/uninstall-client.ps1 for the Windows client side.
 #
+# By default this leaves Ollama and all its models (e.g. qwen2.5:7b,
+# llava:13b) completely untouched, and never installs/removes/reconfigures
+# anything at the OS level — it only removes JARVIS-specific files: the
+# openjarvis systemd unit, the OpenJarvis checkout, the jarvis-tts venv +
+# cached TTS model, and JARVIS's own config/telemetry dir.
+#
 # Usage:
-#   ./uninstall-server.sh            # interactive, asks for confirmation
-#   ./uninstall-server.sh --yes      # skip confirmation
-#   ./uninstall-server.sh --yes --purge-ollama   # also remove Ollama itself
+#   ./uninstall-server.sh                # interactive, asks for confirmation
+#   ./uninstall-server.sh --yes          # skip confirmation
+#   ./uninstall-server.sh --yes --remove-models   # also remove the Ollama
+#                                                  # models listed below
+#   ./uninstall-server.sh --yes --remove-models --purge-ollama   # also
+#                                                  # uninstall Ollama itself
 set -euo pipefail
 
 SERVICE_NAME="openjarvis"
@@ -17,21 +26,28 @@ HF_TTS_CACHE="$HOME/.cache/huggingface/hub/models--facebook--mms-tts-ind"
 MODELS=(qwen2.5:7b llava:13b)
 
 ASSUME_YES=false
+REMOVE_MODELS=false
 PURGE_OLLAMA=false
 for arg in "$@"; do
   case "$arg" in
     --yes) ASSUME_YES=true ;;
+    --remove-models) REMOVE_MODELS=true ;;
     --purge-ollama) PURGE_OLLAMA=true ;;
   esac
 done
 
-echo "This will remove JARVIS (OpenJarvis backend, Ollama models, jarvis-tts,"
-echo "config/telemetry data) from this machine. Paths in use:"
+echo "This will remove JARVIS (OpenJarvis backend, jarvis-tts, config/telemetry"
+echo "data) from this machine. Paths in use:"
 echo "  OpenJarvis dir : $OPENJARVIS_DIR"
 echo "  jarvis-tts venv: $JARVIS_TTS_VENV"
 echo "  Config dir     : $CONFIG_DIR"
-if [ "$PURGE_OLLAMA" = true ]; then
-  echo "  Ollama itself will also be uninstalled (--purge-ollama)."
+if [ "$REMOVE_MODELS" = true ]; then
+  echo "  Ollama models will also be removed: ${MODELS[*]} (--remove-models)"
+  if [ "$PURGE_OLLAMA" = true ]; then
+    echo "  Ollama itself will also be uninstalled (--purge-ollama)."
+  fi
+else
+  echo "  Ollama and all its models are left untouched (pass --remove-models to remove them)."
 fi
 echo
 
@@ -50,20 +66,24 @@ else
   echo "    (no ${SERVICE_NAME}.service unit found, skipping)"
 fi
 
-if command -v ollama >/dev/null 2>&1; then
-  echo "==> Removing Ollama models: ${MODELS[*]}"
-  for m in "${MODELS[@]}"; do
-    ollama rm "$m" 2>/dev/null || echo "    (model $m not present, skipping)"
-  done
-  if [ "$PURGE_OLLAMA" = true ]; then
-    echo "==> Purging Ollama itself"
-    sudo systemctl stop ollama 2>/dev/null || true
-    sudo systemctl disable ollama 2>/dev/null || true
-    sudo rm -rf /usr/share/ollama /usr/local/bin/ollama /etc/systemd/system/ollama.service
-    sudo systemctl daemon-reload
+if [ "$REMOVE_MODELS" = true ]; then
+  if command -v ollama >/dev/null 2>&1; then
+    echo "==> Removing Ollama models: ${MODELS[*]}"
+    for m in "${MODELS[@]}"; do
+      ollama rm "$m" 2>/dev/null || echo "    (model $m not present, skipping)"
+    done
+    if [ "$PURGE_OLLAMA" = true ]; then
+      echo "==> Purging Ollama itself"
+      sudo systemctl stop ollama 2>/dev/null || true
+      sudo systemctl disable ollama 2>/dev/null || true
+      sudo rm -rf /usr/share/ollama /usr/local/bin/ollama /etc/systemd/system/ollama.service
+      sudo systemctl daemon-reload
+    fi
+  else
+    echo "==> Ollama not installed, skipping model removal"
   fi
 else
-  echo "==> Ollama not installed, skipping model removal"
+  echo "==> Skipping Ollama/model removal (pass --remove-models to include it)"
 fi
 
 echo "==> Removing OpenJarvis checkout ($OPENJARVIS_DIR)"
