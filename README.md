@@ -91,6 +91,28 @@ npm run overlay    # terminal 2: Electron floating orb window
 
 `electron/main.js` opens a small frameless, transparent, always-on-top window pointed at the dev server's `?mode=orb` route; `electron/preload.js` exposes `window.orbAPI.captureScreen()` (via `desktopCapturer`) and `window.orbAPI.moveWindowBy()` (drag-to-reposition) to the renderer through `contextBridge`. The UI expects the backend on port 8000 and the TTS service on port 8001 (see `API_BASE` / `TTS_BASE` in `src/App.jsx`).
 
+## Uninstalling
+
+JARVIS spans two machines (the headless mini PC server and the client laptop running the Electron overlay), so removing it fully means running one script on each:
+
+| Script | Run it on | Removes |
+|---|---|---|
+| `uninstall/uninstall-server.sh` | The mini PC (server) | `openjarvis` systemd service, Ollama models, the OpenJarvis checkout, the `jarvis-tts` venv + cached model, and the config/telemetry dir |
+| `uninstall/uninstall-client.ps1` | The Windows client laptop | The `jarvis-hud` repo checkout and any startup shortcut for the overlay |
+
+```bash
+# on the mini PC
+chmod +x uninstall/uninstall-server.sh
+./uninstall/uninstall-server.sh            # add --purge-ollama to remove Ollama itself too
+```
+
+```powershell
+# on the Windows client laptop
+.\uninstall\uninstall-client.ps1
+```
+
+Both scripts ask for confirmation before deleting anything (`--yes` / `-Force` to skip). If you're wiping the mini PC's OS entirely (fresh install/factory reset), you don't need the server script at all — the reset already removes everything on that machine; it's only useful if you want to remove JARVIS while keeping the rest of the OS intact.
+
 ## Security Notes
 
 - `OPENJARVIS_API_KEY` / `VITE_API_KEY` are meant for a private LAN, not a public deployment — the Vite build bundles the key into client-side JS, which is fine for a machine only your own devices can reach but would need a proper auth flow before exposing this over the internet.
