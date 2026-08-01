@@ -1,5 +1,5 @@
-# Uninstalls the JARVIS client (jarvis-hud Electron overlay) from a Windows
-# laptop. Run this ON the client machine — see uninstall/uninstall-server.sh
+﻿# Uninstalls the JARVIS client (jarvis-hud Electron overlay) from a Windows
+# laptop. Run this ON the client machine - see uninstall/uninstall-server.sh
 # for the mini PC / backend side.
 #
 # Usage (from an elevated or normal PowerShell prompt):
@@ -47,6 +47,6 @@ if (Test-Path $RepoDir) {
 }
 
 Write-Host ""
-Write-Host "Client-side cleanup done. This only cleaned this laptop — run"
+Write-Host "Client-side cleanup done. This only cleaned this laptop - run"
 Write-Host "uninstall/uninstall-server.sh on the mini PC to remove the"
 Write-Host "OpenJarvis backend, Ollama models, and jarvis-tts service too."
